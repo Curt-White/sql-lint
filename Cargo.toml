@@ -1,0 +1,11 @@
+[package]
+name = "scratch-dbt-parser"
+version = "0.1.0"
+authors = ["Curtis White <curtiswhite@uvic.ca>"]
+edition = "2018"
+
+# See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
+
+[dependencies]
+regex = "1"
+phf = { version = "0.9", features = ["macros"] }
