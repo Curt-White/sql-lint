@@ -9,139 +9,77 @@ const KEYWORDS: Map<&str, KeywordType> = phf_map! {
 	"AS" => KeywordType::As,
 	"CASE" => KeywordType::Case,
 	"EXCEPT" => KeywordType::Except,
-    "FROM" => KeywordType::From,
-    "SELECT" => KeywordType::Select,
-    "THEN" => KeywordType::Then,
-    "WHEN" => KeywordType::When,
-    "WHERE" => KeywordType::Where,
-    "WITH" => KeywordType::With,
+	"FROM" => KeywordType::From,
+	"SELECT" => KeywordType::Select,
+	"THEN" => KeywordType::Then,
+	"WHEN" => KeywordType::When,
+	"WHERE" => KeywordType::Where,
+	"WITH" => KeywordType::With,
 };
-
-// const KEYWORDS: [(&str, KeywordType); 9] = [
-//     ("AS", KeywordType::As),
-//     ("CASE", KeywordType::Case),
-//     ("EXCEPT", KeywordType::Except),
-//     ("FROM", KeywordType::From),
-//     ("SELECT", KeywordType::Select),
-//     ("THEN", KeywordType::Then),
-//     ("WHEN", KeywordType::When),
-//     ("WHERE", KeywordType::Where),
-//     ("WITH", KeywordType::With),
-// ];
-
-// pub fn handle_keyword(lex: &mut Lexer<Token>) -> Keyword {
-//     let st = String::from(lex.slice());
-
-//     match st.to_uppercase().as_str() {
-//         "SELECT" => Keyword::Select(st),
-//         "FROM" => Keyword::From(st),
-//         _ => panic!("Invalid keyword"),
-//     }
-// }
 
 #[derive(Clone, Debug, PartialEq)]
 pub enum KeywordType {
 	And,
-    As,
-    Case,
-    Except,
-    From,
-    Select,
-    Then,
-    When,
-    Where,
-    With,
+	As,
+	Case,
+	Except,
+	From,
+	Select,
+	Then,
+	When,
+	Where,
+	With,
 }
-
-// #[derive(Logos, Debug, PartialEq)]
-// pub enum Token {
-//     #[error]
-//     Error,
-
-//     #[token("select", handle_keyword)]
-//     Keyword(Keyword),
-//     // #[regex(r"(?i)((SELECT)|(FROM)|(AS))", handle_keyword)]
-//     // Keyword(Keyword),
-
-//     // #[regex(r"[a-zA-Z][a-zA-Z_]*", priority = 2)]
-//     // Identifier,
-//     #[regex(r"[a-zA-Z][a-zA-Z_-]*", priority = 1)]
-//     ExtendedIdentifier,
-
-//     #[token("{")]
-//     OpenCurly,
-
-//     #[token("}")]
-//     CloseCurly,
-
-//     #[token(".")]
-//     Dot,
-
-//     #[token(",")]
-//     Comma,
-
-//     #[token("\n")]
-//     Newline,
-
-//     #[token(" ")]
-//     Space,
-
-//     #[token("`")]
-//     Backtick,
-
-//     #[token("\t")]
-//     Tab,
-// }
 
 #[derive(Debug)]
 pub struct Token {
-    line: usize,
-    column: usize,
-    token_content: TokenType,
+	line: usize,
+	column: usize,
+	token_content: TokenType,
 }
 
 #[derive(Debug)]
 pub enum TokenType {
-    Keyword(KeywordType, String),
+	Keyword(KeywordType, String),
 	Identifier(String),
 	EOF,
 	Equal,
-    ExtendedIdentifier(String),
+	ExtendedIdentifier(String),
 	Integer(i64),
 	Float(f64),
-    OpenCurly,
-    CloseCurly,
-    Dot,
-    Comma,
-    Newline,
-    Space,
-    Backtick,
-    Tab,
+	OpenCurly,
+	CloseCurly,
+	Dot,
+	Comma,
+	Newline,
+	Space,
+	Backtick,
+	Tab,
 }
 
 #[derive(Debug)]
 pub enum GrammerPart {
-    Select,
+	Select,
 }
 
 #[derive(Debug)]
 pub enum ParserError {
-    InvalidToken(String),
+	InvalidToken(String),
 }
 
 #[derive(Debug)]
 pub struct ParserContext {
-    tokens: Vec<Token>,
-    errors: Vec<ParserError>,
+	tokens: Vec<Token>,
+	errors: Vec<ParserError>,
 }
 
 impl ParserContext {
-    pub fn new(tokens: Vec<Token>) -> ParserContext {
-        return ParserContext {
-            tokens,
-            errors: Vec::new(),
-        };
-    }
+	pub fn new(tokens: Vec<Token>) -> ParserContext {
+		return ParserContext {
+			tokens,
+			errors: Vec::new(),
+		};
+	}
 
     // pub fn next_token(&mut self, skip_whitespace: bool) -> Result<Token, ParserError> {
     //     loop {
@@ -199,25 +137,25 @@ pub struct LexerContext<'a> {
 }
 
 impl<'a> LexerContext<'a> {
-    pub fn new(content: &str) -> LexerContext {
-        // Map keywords to giant regex
-        let keyword_regex = Regex::new(
-            format!(
-                r"(?i)^\b({})\b",
-                KEYWORDS.keys().map(|item| {return format!("({})", item).to_string();})
-                    .collect::<Vec<String>>().join("|").as_str()).as_str()).unwrap();
+	pub fn new(content: &str) -> LexerContext {
+		// Map keywords to giant regex
+		let keyword_regex = Regex::new(
+			format!(
+				r"(?i)^\b({})\b",
+				KEYWORDS.keys().map(|item| {return format!("({})", item).to_string();})
+					.collect::<Vec<String>>().join("|").as_str()).as_str()).unwrap();
 
-        return LexerContext {
-            content,
+		return LexerContext {
+			content,
 			position: 0,
 			line: 0,
 			column: 0,
-            keyword_regex,
+			keyword_regex,
 			identifier_regex: Regex::new(r"^[a-zA-Z_\-]+").unwrap(),
 			int_regex: Regex::new(r"^[0-9]+").unwrap(),
 			float_regex: Regex::new(r"^[0-9]+\.[0-9]+").unwrap(),
-        };
-    }
+		};
+	}
 
 	// Handle popping tokens and iterating for regex values given a length
 	fn pop_token(&mut self, length: usize) -> (&str, usize, usize) {
@@ -234,7 +172,7 @@ impl<'a> LexerContext<'a> {
 		self.line += 1;
 	}
 
-    pub fn next_token(&mut self) -> Result<Token, ParserError> {
+	pub fn next_token(&mut self) -> Result<Token, ParserError> {
 		let res = match self.content.chars().nth(self.position) {
 			Some(c) => {
 				match c {
@@ -266,46 +204,37 @@ impl<'a> LexerContext<'a> {
 			return Ok(Token { line: pos.0, column: pos.1, token_content });
 		}
 
-		match self.keyword_regex.find(&self.content[self.position..]) {
-			Some(range) => {
-				let token = self.pop_token(range.range().len());
-				let token_type = KEYWORDS.get(token.0.to_uppercase().as_str());
+		if let Some(range) = self.keyword_regex.find(&self.content[self.position..]) {
+			let token = self.pop_token(range.range().len());
+			let token_type = KEYWORDS.get(token.0.to_uppercase().as_str());
 
-				if let None = token_type {
-					return Err(ParserError::InvalidToken(String::from("Invalid token provided")));
-				}
-				
-				return Ok(Token {
-					token_content: TokenType::Keyword(token_type.unwrap().clone(), token.0.to_string()),
-					line: token.1,
-					column: token.2,
-				});
-			},
-			None => {}
-		}
-		
-		match self.int_regex.find(&self.content[self.position..]) {
-			Some(range) => {
-				let token = self.pop_token(range.range().len());
-				return Ok(Token {
-					token_content: TokenType::Integer(token.0.parse::<i64>().unwrap()),
-					line: token.1,
-					column: token.2,
-				});
-			},
-			None => {}
+			if let None = token_type {
+				return Err(ParserError::InvalidToken(String::from("Invalid token provided")));
+			}
+			
+			return Ok(Token {
+				token_content: TokenType::Keyword(token_type.unwrap().clone(), token.0.to_string()),
+				line: token.1,
+				column: token.2,
+			});
 		}
 
-		match self.identifier_regex.find(&self.content[self.position..]) {
-			Some(range) => {
-				let token = self.pop_token(range.range().len());
-				return Ok(Token {
-					token_content: TokenType::Identifier(token.0.to_string()),
-					line: token.1,
-					column: token.2,
-				});
-			},
-			None => {}
+		if let Some(range) = self.int_regex.find(&self.content[self.position..]) {
+			let token = self.pop_token(range.range().len());
+			return Ok(Token {
+				token_content: TokenType::Integer(token.0.parse::<i64>().unwrap()),
+				line: token.1,
+				column: token.2,
+			});
+		}
+
+		if let Some(range) = self.identifier_regex.find(&self.content[self.position..]) {
+			let token = self.pop_token(range.range().len());
+			return Ok(Token {
+				token_content: TokenType::Identifier(token.0.to_string()),
+				line: token.1,
+				column: token.2,
+			});
 		}
 
 		if self.position == self.content.len() {
@@ -317,9 +246,9 @@ impl<'a> LexerContext<'a> {
 }
 
 fn main() {
-    let sql_contents =
-        fs::read_to_string("/Users/curtiswhite/Projects/scratch-dbt-parser/src/test.sql")
-            .expect("Error");
+	let sql_contents =
+		fs::read_to_string("/Users/curtiswhite/Projects/scratch-dbt-parser/src/test.sql")
+			.expect("Error");
 
 	let mut lexer = LexerContext::new(sql_contents.as_str());
 
